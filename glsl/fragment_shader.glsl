@@ -1,6 +1,6 @@
 #version 300 es
-precision highp float;
+precision mediump float;
 out vec4 color;
 void main() {
-    color = vec4(1, 0, 0.5, 1);
+    color = vec4(1.0, 0.373, 0.02, 1.0);
 }

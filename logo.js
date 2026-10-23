@@ -4,7 +4,8 @@ async function setup()
     const vs = await fetch('glsl/vertex_shader.glsl').then(res => res.text())
     const fs = await fetch('glsl/fragment_shader.glsl').then(res => res.text())
     window.program = compile(vs, fs)
-    // create VAO/VBO for the I here (or in a fillBuffers() helper)
+    gl.useProgram(program)
+    fillBuffers()
     tick(0) // call once, at the end of setup
 }
 
@@ -52,9 +53,41 @@ function compile(vs_source, fs_source) {
     return program
 }
 
+function fillBuffers()
+{
+    const vertices = new Float32Array([
+        // top serif  (x: -0.35..0.35, y: 0.28..0.50)
+        -0.35, 0.28,   0.35, 0.28,   0.35, 0.50,
+        -0.35, 0.28,   0.35, 0.50,  -0.35, 0.50,
+        // stem       (x: -0.12..0.12, y: -0.28..0.28)
+        -0.12,-0.28,   0.12,-0.28,   0.12, 0.28,
+        -0.12,-0.28,   0.12, 0.28,  -0.12, 0.28,
+        // bottom serif (x: -0.35..0.35, y: -0.50..-0.28)
+        -0.35,-0.50,   0.35,-0.50,   0.35,-0.28,
+        -0.35,-0.50,   0.35,-0.28,  -0.35,-0.28,
+    ])
+    window.vertexCount = vertices.length / 2
+
+    window.vao = gl.createVertexArray()
+    gl.bindVertexArray(vao)
+
+    const buffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+
+    gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(0)
+  
+    return buffer
+}
+
 function tick(milliseconds)
 {
     // build mat4 from milliseconds, uniformMatrix4fv, clear, draw
+    gl.clearColor(0.1, 0.1, 0.15, 1)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    // later: gl.uniformMatrix4fv(program.uniforms.uMvp, false, M)
+    gl.drawArrays(gl.TRIANGLES, 0, vertexCount)
     requestAnimationFrame(tick)
 }
 
